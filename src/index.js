@@ -9,15 +9,17 @@ import {
 } from "ethjs-abi";
 import ENS from "ethjs-ens";
 
-import LivepeerTokenArtifact from "../etc/LivepeerToken";
-import LivepeerTokenFaucetArtifact from "../etc/LivepeerTokenFaucet";
-import ControllerArtifact from "../etc/Controller";
-import RoundsManagerArtifact from "../etc/RoundsManager";
-import BondingManagerArtifact from "../etc/BondingManager";
-import MinterArtifact from "../etc/Minter";
-import PollCreatorArtifact from "../etc/PollCreator";
-import PollArtifact from "../etc/Poll";
-import MerkleSnapshotArtifact from "../etc/MerkleSnapshot";
+import LivepeerTokenArtifact from "../abis/LivepeerToken";
+import LivepeerTokenFaucetArtifact from "../abis/LivepeerTokenFaucet";
+import ControllerArtifact from "../abis/Controller";
+import RoundsManagerArtifact from "../abis/RoundsManager";
+import BondingManagerArtifact from "../abis/BondingManager";
+import MinterArtifact from "../abis/Minter";
+import PollCreatorArtifact from "../abis/PollCreator";
+import PollArtifact from "../abis/Poll";
+import MerkleSnapshotArtifact from "../abis/MerkleSnapshot";
+import ServiceRegistryArtifact from "../abis/ServiceRegistry";
+import TicketBrokerArtifact from "../abis/TicketBroker";
 import { VIDEO_PROFILES } from "./video_profiles.js";
 
 // Constants
@@ -55,6 +57,8 @@ export const DEFAULTS = {
     PollCreator: PollCreatorArtifact,
     Poll: PollArtifact,
     MerkleSnapshot: MerkleSnapshotArtifact,
+    ServiceRegistry: ServiceRegistryArtifact,
+    TicketBroker: TicketBrokerArtifact,
   },
   ensRegistries: {
     // Mainnet
@@ -63,6 +67,10 @@ export const DEFAULTS = {
     3: "0x112234455c3a32fd11230c42e7bccd4a84e02010",
     // Rinkeby
     4: "0xe7410170f87102df0055eb195163a03b7f2bff4a",
+    // Arbitrum Rinkeby
+    42161: "0x",
+    // Arbitrum One
+    421611: "0x",
   },
 };
 
@@ -235,9 +243,11 @@ export const utils = {
    * @param  {string[]} topics - list of topics for log query
    * @return {Object}
    */
-  decodeEvent: (event) => ({ data, topics }) => {
-    return decodeEvent(event.abi, data, topics, false);
-  },
+  decodeEvent:
+    (event) =>
+    ({ data, topics }) => {
+      return decodeEvent(event.abi, data, topics, false);
+    },
 };
 
 // Helper functions
@@ -245,8 +255,16 @@ export const utils = {
 // these functions help with formatting those values
 const { BN } = Eth;
 const toBN = (n) => (BN.isBN(n) ? n : new BN(n.toString(10), 10));
-const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)));
-const prop = (k: string | number) => (x): any => x[k];
+const compose = (...fns) =>
+  fns.reduce(
+    (f, g) =>
+      (...args) =>
+        f(g(...args))
+  );
+const prop =
+  (k: string | number) =>
+  (x): any =>
+    x[k];
 const toBool = (x: any): boolean => !!x;
 const toString = (x: Eth.BN): string => x.toString(10);
 const toNumber = (x: Eth.BN): string => Number(x.toString(10));
@@ -302,11 +320,7 @@ export function getContractAt(
  * @ignore
  * @return {{ et, gas: Eth, defaultTx: { from: string, gas: number } }}
  */
-export async function initRPC({
-  account,
-  privateKeys,
-  provider,
-}): Promise<{
+export async function initRPC({ account, privateKeys, provider }): Promise<{
   eth: Eth,
   defaultTx: { from: string },
 }> {
@@ -384,6 +398,8 @@ export async function initContracts(
     RoundsManager: null,
     Minter: null,
     MerkleSnapshot: null,
+    ServiceRegistry: null,
+    TicketBroker: null,
   };
   const hashes = {
     LivepeerToken: {},
@@ -392,6 +408,8 @@ export async function initContracts(
     RoundsManager: {},
     Minter: {},
     MerkleSnapshot: {},
+    ServiceRegistry: {},
+    TicketBroker: {},
   };
   // Create a Controller contract instance
   const Controller = await getContractAt(eth, {
@@ -994,13 +1012,8 @@ export async function createLivepeerSDK(
       if (unbondingLockId.cmp(new BN(0)) > 0) {
         unbondingLockId = unbondingLockId.sub(new BN(1));
       }
-      const {
-        amount: withdrawAmount,
-        withdrawRound,
-      } = await rpc.getDelegatorUnbondingLock(
-        address,
-        toString(unbondingLockId)
-      );
+      const { amount: withdrawAmount, withdrawRound } =
+        await rpc.getDelegatorUnbondingLock(address, toString(unbondingLockId));
       const status =
         withdrawRound !== "0" && toBN(currentRound).cmp(toBN(withdrawRound)) < 0
           ? DELEGATOR_STATUS.Unbonding
