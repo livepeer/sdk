@@ -1,3 +1,6 @@
+[![LivepeerJS](https://user-images.githubusercontent.com/555740/117340053-78210e80-ae6e-11eb-892c-d98085fe6824.png)](https://livepeer.github.io/livepeerjs/)
+
+---
 # Livepeer SDK
 
 [![npm](https://img.shields.io/npm/v/@livepeer/sdk.svg?style=flat-square)](https://www.npmjs.com/package/@livepeer/sdk)
