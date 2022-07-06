@@ -67,10 +67,14 @@ export const DEFAULTS = {
     3: "0x112234455c3a32fd11230c42e7bccd4a84e02010",
     // Rinkeby
     4: "0xe7410170f87102df0055eb195163a03b7f2bff4a",
+    // Goerli
+    5: "0x",
     // Arbitrum Rinkeby
     42161: "0x",
     // Arbitrum One
     421611: "0x",
+    // Arbitrum Goerli
+    421612: "0x",
   },
 };
 
