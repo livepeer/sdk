@@ -74,7 +74,7 @@ export const DEFAULTS = {
     // Arbitrum One
     421611: "0x",
     // Arbitrum Goerli
-    421612: "0x",
+    421613: "0x",
   },
 };
 
